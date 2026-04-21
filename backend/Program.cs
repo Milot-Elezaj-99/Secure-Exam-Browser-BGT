@@ -9,7 +9,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 // Force the app to listen on a different port to avoid conflicts with services
 // (useful when port 5000 is already reserved by the system)
-builder.WebHost.UseUrls("http://127.0.0.1:5001");
+// builder.WebHost.UseUrls("http://127.0.0.1:5001");
 
 // Add services to the container.
 builder.Services.AddControllers();
