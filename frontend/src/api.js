@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5001/api', // Matches ASP.NET Core default port
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
 });
 
 // Add a request interceptor to inject the JWT token
