@@ -179,7 +179,7 @@ const ProfessorDashboard = () => {
     setModalData({ isOpen: false, examId: null });
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5001/api/Exam/start/${examId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/Exam/start/${examId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

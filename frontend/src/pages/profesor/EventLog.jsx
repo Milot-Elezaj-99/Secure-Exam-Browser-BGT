@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  GraduationCap, LayoutDashboard, PlusCircle, Users, 
+import {
+  GraduationCap, LayoutDashboard, PlusCircle, Users,
   Monitor, ClipboardList, LogOut, Search, Trash2, AlertOctagon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +19,7 @@ const EventLogs = () => {
       const token = localStorage.getItem('token');
       if (!token) { navigate('/login'); return; }
 
-      const response = await fetch('http://localhost:5001/api/Logs/my-exams-logs', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/Logs/my-exams-logs`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -42,7 +42,7 @@ const EventLogs = () => {
 
   useEffect(() => {
     fetchLogs();
-    const interval = setInterval(fetchLogs, 5000); 
+    const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -51,9 +51,9 @@ const EventLogs = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5001/api/Exam/disqualify-student', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/Exam/disqualify-student`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
@@ -71,9 +71,9 @@ const EventLogs = () => {
     }
   };
 
-  const filteredLogs = logs.filter(log => 
+  const filteredLogs = logs.filter(log =>
     log.isLive && (
-      log.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      log.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.examTitle?.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
@@ -85,14 +85,14 @@ const EventLogs = () => {
 
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, backgroundColor: '#F8FAFC', fontFamily: 'Inter, sans-serif' }}>
-      
+
       {/* SIDEBAR */}
       <aside style={{ width: '260px', backgroundColor: '#0F172A', color: '#94A3B8', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid #1E293B' }}>
           <div style={{ backgroundColor: '#2563EB', padding: '8px', borderRadius: '6px' }}><GraduationCap color="white" size={20} /></div>
           <span style={{ color: 'white', fontWeight: 'bold', fontSize: '19px' }}>ExamGuard</span>
         </div>
-        
+
         <nav style={{ flex: 1, padding: '20px' }}>
           <SidebarLink icon={LayoutDashboard} label="Dashboard" onClick={() => navigate('/professor')} />
           <SidebarLink icon={PlusCircle} label="Krijo Provim" onClick={() => navigate('/create-exam')} />
@@ -119,11 +119,11 @@ const EventLogs = () => {
           </div>
           <div style={{ position: 'relative' }}>
             <Search size={18} color="#94A3B8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input 
-              type="text" 
-              placeholder="Kërko student ose provim..." 
+            <input
+              type="text"
+              placeholder="Kërko student ose provim..."
               style={{ padding: '12px 15px 12px 40px', borderRadius: '10px', border: '1px solid #E2E8F0', width: '300px', outline: 'none' }}
-              onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             />
           </div>
         </header>
@@ -131,14 +131,14 @@ const EventLogs = () => {
         <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-                <tr style={{ backgroundColor: '#F8FAFC', textAlign: 'left', borderBottom: '1px solid #E2E8F0' }}>
-                  <th style={thStyle}>REZULTATET (PIKËT)</th>
-                  <th style={thStyle}>PROVIMI</th>
-                  <th style={thStyle}>SHKELJET</th>
-                  <th style={thStyle}>RREZIKU</th>
-                  <th style={thStyle}>KOHA</th>
-                  <th style={thStyle}>VEPRIMET</th>
-                </tr>
+              <tr style={{ backgroundColor: '#F8FAFC', textAlign: 'left', borderBottom: '1px solid #E2E8F0' }}>
+                <th style={thStyle}>REZULTATET (PIKËT)</th>
+                <th style={thStyle}>PROVIMI</th>
+                <th style={thStyle}>SHKELJET</th>
+                <th style={thStyle}>RREZIKU</th>
+                <th style={thStyle}>KOHA</th>
+                <th style={thStyle}>VEPRIMET</th>
+              </tr>
             </thead>
             <tbody>
               {loading ? (
@@ -155,8 +155,8 @@ const EventLogs = () => {
                     <td style={tdStyle}>{log.examTitle}</td>
                     <td style={tdStyle}>
                       {log.description.split(';').filter(v => v.trim()).map((v, i) => (
-                        <span key={i} style={{ 
-                          fontSize: '11px', backgroundColor: '#F1F5F9', padding: '2px 8px', 
+                        <span key={i} style={{
+                          fontSize: '11px', backgroundColor: '#F1F5F9', padding: '2px 8px',
                           borderRadius: '4px', marginRight: '4px', borderLeft: '2px solid #64748B'
                         }}>
                           {v.trim()}
@@ -164,7 +164,7 @@ const EventLogs = () => {
                       ))}
                     </td>
                     <td style={tdStyle}>
-                      <span style={{ 
+                      <span style={{
                         padding: '6px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '800',
                         backgroundColor: log.violationType === 'GRAVE' ? '#FEE2E2' : '#FEF3C7',
                         color: log.violationType === 'GRAVE' ? '#B91C1C' : '#92400E'
@@ -172,10 +172,10 @@ const EventLogs = () => {
                     </td>
                     <td style={{ ...tdStyle, color: '#94A3B8' }}>{new Date(log.timestamp).toLocaleTimeString()}</td>
                     <td style={tdStyle}>
-                      <button 
+                      <button
                         onClick={() => handleDisqualify(log.examId, log.studentId, log.studentName)}
                         style={{
-                          backgroundColor: '#EF4444', color: 'white', border: 'none', padding: '8px 14px', 
+                          backgroundColor: '#EF4444', color: 'white', border: 'none', padding: '8px 14px',
                           borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer',
                           display: 'flex', alignItems: 'center', gap: '6px'
                         }}
@@ -190,17 +190,17 @@ const EventLogs = () => {
               )}
             </tbody>
           </table>
-          
+
           {/* PAGINATION UI */}
           {totalPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', padding: '20px', borderTop: '1px solid #E2E8F0', backgroundColor: 'white' }}>
-              <button 
+              <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => prev - 1)}
                 style={paginationButtonStyle}
               >Para</button>
               {[...Array(totalPages)].map((_, i) => (
-                <button 
+                <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
                   style={{
@@ -211,7 +211,7 @@ const EventLogs = () => {
                   }}
                 >{i + 1}</button>
               ))}
-              <button 
+              <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(prev => prev + 1)}
                 style={paginationButtonStyle}
@@ -225,7 +225,7 @@ const EventLogs = () => {
 };
 
 const paginationButtonStyle = {
-  padding: '8px 16px', borderRadius: '8px', border: '1px solid #E2E8F0', 
+  padding: '8px 16px', borderRadius: '8px', border: '1px solid #E2E8F0',
   backgroundColor: 'white', cursor: 'pointer', fontSize: '14px', color: '#64748B', transition: 'all 0.2s'
 };
 

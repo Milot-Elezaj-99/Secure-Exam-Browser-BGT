@@ -15,7 +15,7 @@ const ForgotPassword = () => {
         setError('');
 
         try {
-            const response = await axios.post('http://localhost:5001/api/auth/forgot-password', { 
+            const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/auth/forgot-password`, { 
                 email: email 
             });
             setMessage(response.data.message || "Instruksionet u dërguan!");
