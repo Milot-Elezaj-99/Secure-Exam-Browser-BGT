@@ -51,7 +51,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // React and Vite ports
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "https://secure-exam-browser-bgt.onrender.com") // React, Vite and Production URL
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); // Better for Auth
