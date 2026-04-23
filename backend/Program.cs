@@ -7,17 +7,23 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-// Force the app to listen on a different port to avoid conflicts with services
-// (useful when port 5000 is already reserved by the system)
-builder.WebHost.UseUrls("http://127.0.0.1:5001");
+
+// --- KORRIGJIMI PËR RENDER (PORTI DHE IP) ---
+// Merr portin automatikisht nga Render, ose përdor 5001 nëse po e teston lokalisht
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5001";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 
-// Database (MySQL)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "server=localhost;user=root;password=;database=bgt_secure_exam";
+// --- KORRIGJIMI I DATABAZËS ---
+// Prioritet i jepet variablës së ambientit (për Render), pastaj appsettings.json, pastaj vlerës default
+var connectionString = Environment.GetEnvironmentVariable("MYSQL_CONNECTION_STRING") 
+                       ?? builder.Configuration.GetConnectionString("DefaultConnection") 
+                       ?? "server=localhost;user=root;password=;database=bgt_secure_exam";
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
@@ -26,7 +32,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IExamService, ExamService>();
 
 // Authentication (JWT)
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? "SUPER_SECRET_KEY_123456789_MUST_BE_LONG_ENOUGH");
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "SUPER_SECRET_KEY_123456789_MUST_BE_LONG_ENOUGH";
+var key = Encoding.ASCII.GetBytes(jwtKey);
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -40,27 +48,31 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false, // Set to true in prod
+        ValidateIssuer = false, 
         ValidateAudience = false,
         ValidateLifetime = true
     };
 });
 
-// CORS (Allow Frontend)
+// --- KORRIGJIMI I CORS ---
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "https://secure-exam-browser-bgt.onrender.com") // React, Vite and Production URL
+        policy.WithOrigins(
+                "http://localhost:3000", 
+                "http://localhost:5173", 
+                "https://secure-exam-browser-bgt.onrender.com" // URL e Frontend-it në Render
+              ) 
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .AllowCredentials(); // Better for Auth
+              .AllowCredentials(); 
     });
 });
 
 var app = builder.Build();
 
-// Sigurohu që databaza dhe tabelat janë krijuar (EnsureCreated)
+// Sigurohu që databaza dhe tabelat janë krijuar
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -68,15 +80,15 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<AppDbContext>();
         context.Database.EnsureCreated();
-        Console.WriteLine("Database and tables ensured.");
+        Console.WriteLine("Database check: Success.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"An error occurred while creating the database: {ex.Message}");
+        Console.WriteLine($"Database check error: {ex.Message}");
     }
 }
 
-// Configure the HTTP request pipeline.
+// Konfigurimi i Middleware
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
@@ -84,5 +96,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ExamMonitorHub>("/examHub");
+
+// Kjo duhet për Render që të dijë që aplikacioni është "Healthy"
+app.MapGet("/", () => "Backend is running!");
 
 app.Run();
